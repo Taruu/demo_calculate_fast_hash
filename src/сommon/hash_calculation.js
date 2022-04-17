@@ -1,10 +1,10 @@
-//import xxhash from "xxhash-wasm";
-import {createXXHash64} from 'hash-wasm';
+//import {createXXHash64} from 'hash-wasm';
+import xxhash from 'xxhash-wasm';
 
 export default class HashCalculation {
     constructor(setMax, setNow, callbackFile, nowFile, chunkSize) {
         if (chunkSize === undefined) {
-            chunkSize = 1.28e+8
+            chunkSize = 128e+6
         }
         this.callbackFile = callbackFile;
         this.nowFile = nowFile;
@@ -19,21 +19,13 @@ export default class HashCalculation {
     }
 
     async createWorker() {
-        // const {create64} = await xxhash();
-        // this.hashWorker = create64;
+        //TODO selectors type of hash
+        const {create64} = await xxhash();
+        this.hashWorker = create64
 
-        this.hashWorker = await createXXHash64()
-        console.log(this.hashWorker)
-        return
     }
 
     readUint8Array(blobObj) {
-        //atom-amd64.deb
-        // File hash: f2cf4d5cd0ac0743
-        // File size: 118.43 MB Time: 0.514s.
-        //atom-amd64.deb
-        // File hash: ef46db3751d8e999
-        // File size: 118.43 MB Time: 0.377s.
         const fileReader = this.fileReader;
         const setNow = this.setProgressNow
         const beforeBytes = this.chunkSize * this.nowChunk
@@ -70,20 +62,19 @@ export default class HashCalculation {
             listSlice.push(FileObj.slice(start, end))
         }
         return listSlice
-
     }
 
     async calcHash(fileObj) {
         const listBlob = this.sliceFile(fileObj)
-        this.hashWorker.init()
+        const localWorker = this.hashWorker()
         let uint8Array = []
         for (const [i, blob] of listBlob.entries()) {
             this.nowChunk = i
             uint8Array = await this.readUint8Array(blob)
-            this.hashWorker.update(uint8Array)
+            localWorker.update(uint8Array)
         }
 
-        return this.hashWorker.digest().toString(16)
+        return localWorker.digest().toString(16)
     }
 
     async startHashCalculation() {
@@ -97,7 +88,6 @@ export default class HashCalculation {
             this.setProgressNow(file.size)
             this.callbackFile(file, fileHash, (new Date() - start) / 1000)
         }
-
     }
 
 
