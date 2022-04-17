@@ -2,11 +2,12 @@
 import {createXXHash64} from 'hash-wasm';
 
 export default class HashCalculation {
-    constructor(setMax, setNow, callbackFile, chunkSize) {
+    constructor(setMax, setNow, callbackFile, nowFile, chunkSize) {
         if (chunkSize === undefined) {
             chunkSize = 1.28e+8
         }
-        this.callbackFile = callbackFile
+        this.callbackFile = callbackFile;
+        this.nowFile = nowFile;
         this.setProgressMax = setMax;
         this.setProgressNow = setNow;
         this.chunkSize = chunkSize //bytes
@@ -26,6 +27,12 @@ export default class HashCalculation {
     }
 
     readUint8Array(blobObj) {
+        //atom-amd64.deb
+        // File hash: f2cf4d5cd0ac0743
+        // File size: 118.43 MB Time: 0.514s.
+        //atom-amd64.deb
+        // File hash: ef46db3751d8e999
+        // File size: 118.43 MB Time: 0.377s.
         const fileReader = this.fileReader;
         const setNow = this.setProgressNow
         const beforeBytes = this.chunkSize * this.nowChunk
@@ -83,10 +90,12 @@ export default class HashCalculation {
         const staticListFiles = this.listFiles.concat()
         let fileHash = "";
         for (let file of staticListFiles) {
+            const start = new Date()
             this.setProgressMax(file.size)
+            this.nowFile(file)
             fileHash = await this.calcHash(file)
             this.setProgressNow(file.size)
-            this.callbackFile(file, fileHash)
+            this.callbackFile(file, fileHash, (new Date() - start) / 1000)
         }
 
     }

@@ -1,27 +1,26 @@
 <template>
   <v-container>
-    <v-row class="text-center">
+    <v-row>
       <v-col cols="12">
 
       </v-col>
-
-      <v-col class="mb-4">
+      <v-col class="mb-4 text-center">
         <h1 class="display-2 font-weight-bold mb-3">
           Simple demo fast hash calculation
         </h1>
 
         <p class="subheading font-weight-regular">
-
+          A simple example of a quick hash calculation using xxhash. In most supported browsers
         </p>
       </v-col>
 
       <v-col
           cols="12"
       >
-        <h2 class="headline font-weight-bold mb-3">
-          What's next?
+        <h2 class="headline text-center font-weight-bold mb-3">
+          Select you files
         </h2>
-        <v-row class="mx-lg-16 mx-lg-auto">
+        <v-row class="mx-lg-16 mx-1 mx-lg-auto">
           <v-file-input
               v-model="files"
               color="deep-purple accent-4"
@@ -49,33 +48,54 @@
                   v-else-if="index === 2"
                   class="text-overline grey--text text--darken-3 mx-2"
               >
-        +{{ files.length - 2 }} File(s)
-      </span>
+        +{{ files.length - 2 }} File(s)</span>
             </template>
           </v-file-input>
-          <v-progress-linear
-              v-model="progress"
-              class="mx-lg-8"
-              color="blue-grey"
-              height="25"
-          >
-            <template>
-              <strong>{{ `${nowFileObj.filename} ${this.file_size_str(this.progressNow)} / ${this.file_size_str(this.progressMax)}` }}</strong>
-            </template>
-          </v-progress-linear>
         </v-row>
-
       </v-col>
+      <v-col>
+        <v-progress-linear
+            v-model="progress"
 
+            color="blue-grey"
+            height="60"
+        >
+          <template>
+            <strong>{{
+                `${this.nowFileObj.name} ${this.file_size_str(this.progressNow)} / ${this.file_size_str(this.progressMax)}`
+              }}</strong>
+          </template>
+        </v-progress-linear>
+      </v-col>
       <v-col
-          class="mb-5"
+          class="mb-5 text-center"
           cols="12"
       >
         <h2 class="headline font-weight-bold mb-3">
-          <v-btn color="primary" v-on:click="start">Start</v-btn>
+          <v-btn :loading="startCalc" large x-large color="primary" v-on:click="start">Start</v-btn>
         </h2>
       </v-col>
-
+      <v-col>
+        <v-card
+            class="mx-auto"
+            max-width="auto"
+            tile
+        >
+          <v-card-title>{{this.doneFiles.length}}/{{this.files.length}}</v-card-title>
+          <v-list-item v-for="item in doneFiles"
+                       :key="item.file.name" three-line>
+            <v-list-item-content>
+              <v-list-item-title>{{ `${item.file.name}` }}</v-list-item-title>
+              <v-list-item-subtitle>
+                File hash: {{ item.hash }}
+              </v-list-item-subtitle>
+              <v-list-item-subtitle>
+                {{ `File size: ${file_size_str(item.file.size)} Time: ${item.time}s.` }}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-card>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -88,7 +108,7 @@ export default {
   name: 'LoadFile',
 
   created() {
-    this.hashWorker = new HashCalculation(this.max_progress, this.now_progress, this.file_done)
+    this.hashWorker = new HashCalculation(this.max_progress, this.now_progress, this.file_done, this.now_file)
     this.hashWorker.createWorker().then()
   },
   computed: {
@@ -99,14 +119,27 @@ export default {
   watch: {
     files() {
       this.hashWorker.setFiles(this.files);
+    },
+    doneFiles(){
+      if(this.doneFiles.length === this.files.length) this.startCalc = false;
     }
+
   },
   methods: {
     start() {
       this.hashWorker.startHashCalculation().then()
+      this.doneFiles = []
+      this.startCalc = true;
     },
-    file_done(fileObj, fileHash) {
-      console.log(fileObj, fileHash)
+    file_done: function (fileObj, fileHash, time) {
+      console.log(this.doneFiles)
+      console.log(fileObj, fileHash, time)
+      this.doneFiles.push({
+        file: fileObj,
+        hash: fileHash,
+        time: time,
+      })
+
     },
     now_progress: function (progressNow) {
       this.progressNow = progressNow;
@@ -115,6 +148,7 @@ export default {
       this.progressMax = progressMax
     },
     now_file: function (fileObj) {
+      this.nowFileObj = fileObj;
 
     },
     file_size_str(file_size) {
@@ -134,6 +168,8 @@ export default {
     progressMax: 0,
     progressNow: 0,
     files: [],
+    doneFiles: [],
+    startCalc: false,
     hashWorker: undefined,
   }),
 }
