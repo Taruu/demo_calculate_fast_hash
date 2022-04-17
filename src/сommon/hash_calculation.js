@@ -21,7 +21,8 @@ export default class HashCalculation {
     async createWorker() {
         // const {create64} = await xxhash();
         // this.hashWorker = create64;
-        this.hashWorker = createXXHash64
+
+        this.hashWorker = await createXXHash64()
         console.log(this.hashWorker)
         return
     }
@@ -74,16 +75,15 @@ export default class HashCalculation {
 
     async calcHash(fileObj) {
         const listBlob = this.sliceFile(fileObj)
-        let hasher = await this.hashWorker()
-        hasher.init()
+        this.hashWorker.init()
         let uint8Array = []
         for (const [i, blob] of listBlob.entries()) {
             this.nowChunk = i
             uint8Array = await this.readUint8Array(blob)
-            hasher.update(uint8Array)
+            this.hashWorker.update(uint8Array)
         }
 
-        return hasher.digest().toString(16)
+        return this.hashWorker.digest().toString(16)
     }
 
     async startHashCalculation() {
