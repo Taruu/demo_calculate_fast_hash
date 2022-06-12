@@ -55,10 +55,10 @@
       </v-col>
       <v-col>
         <v-progress-linear
-            v-model="progress"
-
-            color="blue-grey"
+            :value="progress"
+            color="#f7945e"
             height="60"
+            striped
         >
           <template>
             <strong>{{
@@ -81,7 +81,7 @@
             max-width="auto"
             tile
         >
-          <v-card-title>{{this.doneFiles.length}}/{{this.files.length}}</v-card-title>
+          <v-card-title>{{ this.doneFiles.length }}/{{ this.files.length }}</v-card-title>
           <v-list-item v-for="item in doneFiles"
                        :key="item.file.name" three-line>
             <v-list-item-content>
@@ -103,6 +103,7 @@
 <script>
 
 import HashCalculation from '../сommon/hash_calculation.js'
+import throttle from 'lodash/throttle'
 
 export default {
   name: 'LoadFile',
@@ -120,8 +121,8 @@ export default {
     files() {
       this.hashWorker.setFiles(this.files);
     },
-    doneFiles(){
-      if(this.doneFiles.length === this.files.length) this.startCalc = false;
+    doneFiles() {
+      if (this.doneFiles.length === this.files.length) this.startCalc = false;
     }
 
   },
@@ -141,9 +142,9 @@ export default {
       })
 
     },
-    now_progress: function (progressNow) {
+    now_progress: throttle(function (progressNow) {
       this.progressNow = progressNow;
-    },
+    },100),
     max_progress: function (progressMax) {
       this.progressMax = progressMax
     },

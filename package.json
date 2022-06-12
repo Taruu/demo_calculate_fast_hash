@@ -10,6 +10,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "hash-wasm": "^4.9.0",
+    "lodash": "^4.17.21",
     "vue": "^2.6.11",
     "vuetify": "^2.6.4",
     "xxhash-wasm": "^1.0.1"

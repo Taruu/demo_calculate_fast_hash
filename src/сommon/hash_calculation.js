@@ -1,10 +1,10 @@
-//import {createXXHash64} from 'hash-wasm';
-import xxhash from 'xxhash-wasm';
+import {createXXHash64} from 'hash-wasm';
+//import xxhash from 'xxhash-wasm';
 
 export default class HashCalculation {
     constructor(setMax, setNow, callbackFile, nowFile, chunkSize) {
         if (chunkSize === undefined) {
-            chunkSize = 128e+6
+            chunkSize = 1.28e+8
         }
         this.callbackFile = callbackFile;
         this.nowFile = nowFile;
@@ -20,8 +20,10 @@ export default class HashCalculation {
 
     async createWorker() {
         //TODO selectors type of hash
-        const {create64} = await xxhash();
-        this.hashWorker = create64
+        // const {create64} = await xxhash();
+        // this.hashWorker = create64
+        const hash_obj = await createXXHash64()
+        this.hashWorker = hash_obj
 
     }
 
@@ -50,11 +52,12 @@ export default class HashCalculation {
     }
 
     sliceFile(FileObj) {
+
         let listSlice = []
-        let start = 0
+
         const count = Math.round(FileObj.size / this.chunkSize) + 1
         for (let i = 0; i < count; i++) {
-            start = i * this.chunkSize
+            const start = i * this.chunkSize
             let end = start + this.chunkSize
             if (end > FileObj.size) {
                 end = FileObj.size
@@ -66,7 +69,8 @@ export default class HashCalculation {
 
     async calcHash(fileObj) {
         const listBlob = this.sliceFile(fileObj)
-        const localWorker = this.hashWorker()
+        //const localWorker = this.hashWorker()
+        const localWorker = this.hashWorker.init()
         let uint8Array = []
         for (const [i, blob] of listBlob.entries()) {
             this.nowChunk = i
@@ -87,6 +91,7 @@ export default class HashCalculation {
             fileHash = await this.calcHash(file)
             this.setProgressNow(file.size)
             this.callbackFile(file, fileHash, (new Date() - start) / 1000)
+
         }
     }
 
