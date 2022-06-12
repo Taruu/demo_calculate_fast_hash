@@ -1,24 +1,6 @@
 # demo_calculate_fast_hash
 
-## Project setup
-```
-yarn install
-```
+**Symple hash files demo use xxhash**
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+Demo: [Link](https://taruu.github.io/demo_calculate_fast_hash/]).
 
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
