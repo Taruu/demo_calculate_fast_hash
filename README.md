@@ -2,5 +2,5 @@
 
 **Symple hash files demo use xxhash**
 
-Demo: [Link](https://taruu.github.io/demo_calculate_fast_hash/]).
+Demo: [Link](https://taruu.github.io/xxhash_fast_hash_big_files/).
 
